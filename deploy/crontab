@@ -1,0 +1,19 @@
+# StockbitBot — alternatif penjadwalan via crontab (tanpa daemon 24/7)
+#
+# GUNAKAN INI HANYA jika MORNING_ENABLED=0 dan EVENING_ENABLED=0 di .env
+# (daemon tanpa cron internal). Aktif keduanya sekaligus = laporan terkirim dua kali.
+#
+# Pemasangan: sudo crontab -e (root) atau crontab -e (user yang punya file ini)
+#
+# Catatan waktu: server biasanya berzona UTC. 08:15 WIB = 01:15 UTC;
+# 16:15 WIB = 09:15 UTC. Sesuaikan kalau server memakai zona lain.
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+APP_DIR=/opt/bot-pantau-saham
+
+# Laporan pagi, Senin-Jumat pukul 08:15 WIB
+15 1 * * 1-5  cd ${APP_DIR} && /usr/bin/node index.js --morning --once >> daemon.log 2>&1
+
+# Laporan sore, Senin-Jumat pukul 16:15 WIB
+15 9 * * 1-5  cd ${APP_DIR} && /usr/bin/node index.js --evening --once >> daemon.log 2>&1

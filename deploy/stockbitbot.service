@@ -1,0 +1,39 @@
+# StockbitBot — unit systemd (daemon, jalan terus)
+#
+# Diperlukan Node.js >= 22 (stockbit-mcp@1.3.0). Ganti ExecStart bila node
+# terpasang di /usr/local/bin.
+#
+# Pemasangan:
+#   sudo useradd -r -s /usr/sbin/nologin stockbitbot
+#   sudo mkdir -p /opt/bot-pantau-saham
+#   sudo cp -r . /opt/bot-pantau-saham
+#   sudo cp .env.linux /opt/bot-pantau-saham/.env
+#   sudo cp deploy/stockbitbot.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now stockbitbot
+#
+# Catatan: unit ini mengandalkan cron internal daemon (MORNING_ENABLED=1,
+# EVENING_ENABLED=1 di .env). Jangan aktifkan crontab atau timer --once
+# bersamaan, nanti laporan terkirim dua kali.
+
+[Unit]
+Description=StockbitBot Telegram (bot-pantau-saham)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=stockbitbot
+Group=stockbitbot
+WorkingDirectory=/opt/bot-pantau-saham
+# Node membaca .env dari WorkingDirectory via dotenv; file ini sebagai cadangan eksplisit.
+EnvironmentFile=/opt/bot-pantau-saham/.env
+ExecStart=/usr/bin/node index.js
+Restart=always
+RestartSec=10
+# Log masuk journalctl -u stockbitbot
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
