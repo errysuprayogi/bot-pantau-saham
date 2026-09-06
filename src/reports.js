@@ -226,14 +226,14 @@ async function watchlistBlock(wl, client) {
   const lines = raw.map((r, i) => {
     const panah = r.changePercent > 0 ? "⬆" : (r.changePercent < 0 ? "⬇" : "➖");
     const pr = r.changePercent === 0 ? "0%" : pct(r.changePercent);
-    const base = `${panah} ${i + 1}. ${escHtml(r.symbol)}  ${harga(r.price)}  (${pr})`;
+    const base = `${i + 1}. ${panah} ${escHtml(r.symbol)}  ${harga(r.price)}  (${pr})`;
     const flow = flowBySymbol.get(r.symbol);
     if (!flow) return base;
     const verdict = flow.verdict === "n/a" && !flow.brokerCount
       ? ""
       : `${verdictEmoji(flow.verdict)} ${flow.verdict}${flow.brokerCount ? ` (${flow.brokerCount} broker)` : ""}`;
-    const label = flow.label ? `     ${flow.label}` : "";
-    return `${base}${verdict ? ` | ${verdict}` : ""}${label ? `\n${label}` : ""}`;
+    const label = flow.label ? `${flow.label}` : "";
+    return `${base}${verdict ? `\n${verdict}` : ""}${label ? `\n${label}` : ""}`;
   });
   return section(title, lines);
 }
