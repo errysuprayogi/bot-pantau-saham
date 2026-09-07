@@ -18,6 +18,8 @@ const HELP = [
   "Isi laporan: IHSG, top gainer/loser, akumulasi & jual asing, radar bandar/modal besar, dan berita."
 ].join("\n");
 
+const PARSE_MODE = "HTML";
+
 function escHtml(s) {
   return String(s)
     .replace(/&/g, "&amp;")
@@ -72,7 +74,7 @@ class Messenger {
     const cmd = txt.split(/\s+/)[0].toLowerCase();
     const reply = (text) =>
       this.bot.sendMessage(chat, text, {
-        parse_mode: "HTML",
+        parse_mode: PARSE_MODE,
         disable_web_page_preview: true
       });
 
@@ -114,7 +116,7 @@ class Messenger {
       throw new Error("Chat belum terdaftar: kirim /start ke bot, atau isi TELEGRAM_CHAT_ID di .env");
     }
     return this.bot.sendMessage(this.chatId, text, {
-      parse_mode: "HTML",
+      parse_mode: PARSE_MODE,
       disable_web_page_preview: true
     });
   }

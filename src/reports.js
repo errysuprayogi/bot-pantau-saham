@@ -9,7 +9,7 @@ const WL_MOVERS_N = 5;
 const harga = (x) => num(x, 0);
 
 function section(title, lines) {
-  return [title, ...lines].join("\n");
+  return [`<b>${title}</b>`, ...lines].join("\n");
 }
 
 function noteEmpty() {
@@ -173,7 +173,7 @@ async function getBrokerFlow(client, symbol) {
     .map((b) => ({ code: String(b.code || ""), v: Math.abs(Number(b.netValueIdr) || 0) }))
     .filter((b) => b.v > 0)
     .sort((a, b) => b.v - a.v)
-    .slice(0, 3)
+    .slice(0, 2)
     .map((b) => `${b.code} ${idrShort(b.v)}`);
   const buyNet = (res.buyers || []).reduce((a, b) => a + (Number(b.netValueIdr) || 0), 0);
   const sellNet = Math.abs((res.sellers || []).reduce((a, b) => a + (Number(b.netValueIdr) || 0), 0));
@@ -226,7 +226,7 @@ async function watchlistBlock(wl, client) {
   const lines = raw.map((r, i) => {
     const panah = r.changePercent > 0 ? "⬆" : (r.changePercent < 0 ? "⬇" : "➖");
     const pr = r.changePercent === 0 ? "0%" : pct(r.changePercent);
-    const base = `${i + 1}. ${panah} ${escHtml(r.symbol)}  ${harga(r.price)}  (${pr})`;
+    const base = `${i + 1}. ${escHtml(r.symbol)}  ${harga(r.price)}  (${pr}) ${panah}`;
     const flow = flowBySymbol.get(r.symbol);
     if (!flow) return base;
     const verdict = flow.verdict === "n/a" && !flow.brokerCount
@@ -364,9 +364,9 @@ async function buildMorning(client) {
 
   const session = aku.session || jual.session || big.session;
   const header = [
-    "🌅 PRE-MARKET BRIEFING — IDX",
+    "<b>🌅 PRE-MARKET BRIEFING — IDX</b>",
     dateStr,
-    session ? `📅 Data sesi terakhir: ${sessionDate(session)}` : ""
+    session ? `<b>📅 Data sesi terakhir: ${sessionDate(session)}</b>` : ""
   ].filter(Boolean).join("\n");
 
   const blocks = [header];
@@ -406,7 +406,7 @@ async function buildEvening(client) {
 
   const session = aku.session || jual.session || big.session;
   const header = [
-    "🌆 RECAP HARIAN IDX" + (session ? " — " + sessionDate(session) : ""),
+    `<b>🌆 RECAP HARIAN IDX${session ? " — " + sessionDate(session) : ""}</b>`,
     wibDateTime(new Date())
   ].join("\n");
 
