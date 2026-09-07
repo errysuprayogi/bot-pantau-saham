@@ -21,6 +21,10 @@ RUN npx playwright install chromium --with-deps || true
 
 COPY . .
 
+# Patch dist stockbit-mcp agar market_movers mengirim filter_stocks (4 papan saham),
+# sama dengan client resmi — tanpa ini daftar mover didominasi structured warrant.
+RUN node deploy/patch-stockbit-mcp.js
+
 ENV NODE_ENV=production \
     STOCKBIT_SERVER_NODE=node \
     STOCKBIT_SERVER_SCRIPT=/usr/local/lib/node_modules/stockbit-mcp/dist/bin/stockbit-mcp.js \

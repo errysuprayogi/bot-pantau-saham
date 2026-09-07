@@ -39,6 +39,9 @@ fi
 cd /opt/bot-pantau-saham
 npm ci --omit=dev
 
+echo "==> Patch stockbit-mcp (filter_stocks untuk mover)"
+node deploy/patch-stockbit-mcp.js
+
 echo "==> Siapkan .env & user service"
 cp -n .env.linux .env || true
 echo "TELEGRAM_BOT_TOKEN=" >> .env
