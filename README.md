@@ -4,13 +4,13 @@ Bot Telegram harian (Bahasa Indonesia) yang mengirim rangkuman pasar IDX, berita
 
 ## Isi laporan
 
-**Laporan pagi (PRE-MARKET BRIEFING)** — 08:15 WIB, Senin–Jumat
+**Laporan pagi (PRE-MARKET BRIEFING)** — 09:15 WIB, Senin–Jumat
 - IHSG (harga, perubahan, persen)
 - Saham paling diakumulasi asing (net buy) & paling dijual asing (net sell)
 - Radars modal besar / bandar (big money net value)
 - (tidak memuat watchlist — khusus sesi sore)
 
-**Laporan sore (RECAP HARIAN)** — 16:15 WIB, Senin–Jumat
+**Laporan sore (RECAP HARIAN)** — 18:15 WIB, Senin–Jumat
 - IHSG, top gainer & top loser (waran otomatis disaring)
 - Akumulasi / jual bersih asing
 - Radar bandar per saham: verdict akumulasi/distribusi + broker akumulator & distributor terbesar (dikelompokkan Asing/BUMN/Lokal)
@@ -44,8 +44,8 @@ Watchlist hanya dikirim pada **laporan sore**.
    ```
    TELEGRAM_BOT_TOKEN=123456:ABC-...
    # TELEGRAM_CHAT_ID=      # opsional; tanpa ini, chat id terdaftar otomatis via /start
-   MORNING_CRON=15 8 * * 1-5
-   EVENING_CRON=15 16 * * 1-5
+   MORNING_CRON=15 9 * * 1-5
+   EVENING_CRON=15 18 * * 1-5
    # Untuk mode daemon yang melayani perintah Telegram, matikan cron internal:
    # MORNING_ENABLED=0
    # EVENING_ENABLED=0
@@ -75,8 +75,8 @@ Ada **tiga** tugas terdaftar (path sudah mengacu ke folder `bot-pantau-saham`):
 
 | Tugas | Pemicu | Perintah |
 |---|---|---|
-| `StockbitBotMorning` | Sen–Jum 08:15 WIB | `start-once.bat --morning` |
-| `StockbitBotEvening` | Sen–Jum 16:15 WIB | `start-once.bat --evening` |
+| `StockbitBotMorning` | Sen–Jum 09:15 WIB | `start-once.bat --morning` |
+| `StockbitBotEvening` | Sen–Jum 18:15 WIB | `start-once.bat --evening` |
 | `StockbitBotDaemon` | Saat login Windows | `start.bat` (daemon, jalan terus) |
 
 Semua tugas berjalan **interactive only** (harus login Windows). `StartWhenAvailable=true` untuk ketiganya (kalau jam terlewat, dijalankan begitu sistem tersedia) dan tanpa batasan baterai.

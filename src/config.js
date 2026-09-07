@@ -12,8 +12,8 @@ const config = {
   botToken: env("TELEGRAM_BOT_TOKEN", null),
   chatId: env("TELEGRAM_CHAT_ID", ""),
   timezone: env("REPORT_TIMEZONE", "Asia/Jakarta"),
-  scheduleMorning: env("MORNING_CRON", "15 8 * * 1-5"),
-  scheduleEvening: env("EVENING_CRON", "15 16 * * 1-5"),
+  scheduleMorning: env("MORNING_CRON", "15 9 * * 1-5"),
+  scheduleEvening: env("EVENING_CRON", "15 18 * * 1-5"),
   sendMorning: env("MORNING_ENABLED", "1") === "1",
   sendEvening: env("EVENING_ENABLED", "1") === "1",
   server: {
