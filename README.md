@@ -93,6 +93,24 @@ Aktif selama daemon berjalan (atau `node index.js` tanpa `--once`).
 - `/sore` — kirim laporan sore sekarang
 - `/test` — sama dengan `/now`
 
+## Update token Stockbit di VM GCP (lewat HAR)
+
+Saat token Stockbit di VM kadaluarsa/ditolak (bot berhenti mengirim atau `stockbit-auth status` menunjukkan *REJECTED*), perbarui tanpa perlu login browser di VM:
+
+1. **Export HAR**: di browser (Windows) buka `stockbit.com`, pastikan sudah login akun Stockbit, buka *DevTools (F12) → Network → centang Preserve log*, refresh halaman, lalu *Export HAR…*. Simpan sebagai `Downloads\stockbit.com.har` (atau di mana saja).
+2. **Jalankan script auto** (WSL, gcloud harus sudah login):
+   ```
+   bash deploy/update-token.sh
+   # HAR lain:  bash deploy/update-token.sh /home/anda/foo.har
+   ```
+   Atau di Windows: double-click `deploy\update-token.bat` (default HAR `Downloads\stockbit.com.har`).
+3. Script melakukan: scp HAR ke VM via IAP → `stockbit-auth import-har` (user `stockbitbot`, store `/var/lib/stockbitbot/.stockbit`) → hapus HAR dari VM → restart service `stockbitbot` → verifikasi sesi.
+4. Cek hasil: `sudo journalctl -u stockbitbot --since '1 min ago'` di VM, atau kirim perintah `/now` ke bot.
+
+> HAR berisi kredensial plaintext — jangan dibagikan, dan script otomatis menghapusnya dari VM setelah impor.
+>
+> ⚠ **HAR wajib fresh setiap kali.** HAR menyimpan *refresh token* yang family-nya berubah begitu token itu dipakai (saat bot membaca data). HAR yang sama **tidak bisa dipakai dua kali** — impor ulang = token ditolak (401). Selalu *export ulang* dari browser sebelum update token.
+
 ## Catatan
 
 - **Informasi, bukan rekomendasi investasi.** Data berasal dari Stockbit (subset dari sesi terakhir; bila pasar libur, menampilkan sesi terakhir yang ada).
