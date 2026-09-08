@@ -1,4 +1,4 @@
-const { escHtml, num, idr, idrShort, pct, price, sessionDate, wibDateTime } = require("./format");
+const { escHtml, num, compact, idr, idrShort, pct, price, sessionDate, wibDateTime } = require("./format");
 
 const MAX_BLOCK = 3800;
 const LIST_N = 5;
@@ -136,6 +136,16 @@ function isWaran(row) {
   return /waran/i.test(String(row.name || ""));
 }
 
+function volCompact(x) {
+  const n = Number(x);
+  if (!Number.isFinite(n) || n <= 0) return "-";
+  if (n >= 1e12) return `${compact(n / 1e12)} T`;
+  if (n >= 1e9) return `${compact(n / 1e9)} M`;
+  if (n >= 1e6) return `${compact(n / 1e6)} jt`;
+  if (n >= 1e3) return `${compact(n / 1e3)} rb`;
+  return String(Math.round(n));
+}
+
 async function getPreOpen(client, symbol) {
   const res = await client.call("orderbook", { symbol });
   const block = (res && res.iepiev) || {};
@@ -155,12 +165,11 @@ async function preOpenBlock(wl, client) {
   const rows = await Promise.all(
     wl.rows.map((r) => getPreOpen(client, r.symbol).catch(() => null))
   );
-  const ievLabel = (x) => (Number.isFinite(x) && x > 0 ? num(x, 0) : "-");
   const lines = rows
     .filter((p) => p !== null)
     .map((p, i) => {
       const pctS = p.pctVsPrev === null ? "n/a" : pctPlain(p.pctVsPrev);
-      return `${i + 1}. ${escHtml(p.symbol)}  IEP ${harga(p.iep)}  (${pctS} vs prev)  IEV ${ievLabel(p.iev)}`;
+      return `${i + 1}. ${escHtml(p.symbol)}  IEP ${harga(p.iep)}  (${pctS})  IEV ${volCompact(p.iev)}`;
     });
   return section(title, lines.length ? lines : noteEmpty());
 }
@@ -414,7 +423,7 @@ async function buildMorning(client) {
     : noteEmpty()));
 
   blocks.push(section("🏦 RADAR MODAL BESAR / BANDAR", big.rows.length
-    ? big.rows.map(kv(bigMoneyLine))
+    ? big.rows.slice(0, LIST_N).map(kv(bigMoneyLine))
     : noteEmpty()));
 
   blocks.push(newsBlock(news));
