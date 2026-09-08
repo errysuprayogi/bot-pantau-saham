@@ -4,11 +4,12 @@ Bot Telegram harian (Bahasa Indonesia) yang mengirim rangkuman pasar IDX, berita
 
 ## Isi laporan
 
-**Laporan pagi (PRE-MARKET BRIEFING)** — 09:15 WIB, Senin–Jumat
+**Laporan pagi (PRE-MARKET BRIEFING)** — 08:55 WIB, Senin–Jumat (jendela pre-opening IDX 08:45–09:00)
+- Pre-opening watchlist: harga indikatif (IEP), volume indikatif (IEV), perubahan vs penutupan kemarin
 - IHSG (harga, perubahan, persen)
 - Saham paling diakumulasi asing (net buy) & paling dijual asing (net sell)
 - Radars modal besar / bandar (big money net value)
-- (tidak memuat watchlist — khusus sesi sore)
+- (tidak memuat watchlist reguler — khusus sesi sore)
 
 **Laporan sore (RECAP HARIAN)** — 18:15 WIB, Senin–Jumat
 - IHSG, top gainer & top loser (waran otomatis disaring)
@@ -27,7 +28,7 @@ Nama watchlist yang dilaporkan dikendalikan konstanta `WATCHLIST_NAME` di `src/r
 - `<saham> <harga> (perubahan) | <verdict bandar>` — mis. `🟡 Netral (9 broker)`
 - Baris broker dominan: `Diborong`/`Dijual` + jenis (asing/lokal/bumn) + 3 kode broker dengan nominal, mis. `Diborong asing (BB Rp18,5 M, BK Rp12,3 M, KZ Rp12,2 M)`
 
-Watchlist hanya dikirim pada **laporan sore**.
+Watchlist reguler (harga + verdict bandar) hanya dikirim pada **laporan sore**; pada **laporan pagi** hanya tampil harga indikatif pre-opening (IEP/IEV).
 
 ## Persyaratan
 
@@ -44,7 +45,7 @@ Watchlist hanya dikirim pada **laporan sore**.
    ```
    TELEGRAM_BOT_TOKEN=123456:ABC-...
    # TELEGRAM_CHAT_ID=      # opsional; tanpa ini, chat id terdaftar otomatis via /start
-   MORNING_CRON=15 9 * * 1-5
+   MORNING_CRON=55 8 * * 1-5
    EVENING_CRON=15 18 * * 1-5
    # Untuk mode daemon yang melayani perintah Telegram, matikan cron internal:
    # MORNING_ENABLED=0
@@ -75,7 +76,7 @@ Ada **tiga** tugas terdaftar (path sudah mengacu ke folder `bot-pantau-saham`):
 
 | Tugas | Pemicu | Perintah |
 |---|---|---|
-| `StockbitBotMorning` | Sen–Jum 09:15 WIB | `start-once.bat --morning` |
+| `StockbitBotMorning` | Sen–Jum 08:55 WIB | `start-once.bat --morning` |
 | `StockbitBotEvening` | Sen–Jum 18:15 WIB | `start-once.bat --evening` |
 | `StockbitBotDaemon` | Saat login Windows | `start.bat` (daemon, jalan terus) |
 

@@ -136,6 +136,35 @@ function isWaran(row) {
   return /waran/i.test(String(row.name || ""));
 }
 
+async function getPreOpen(client, symbol) {
+  const res = await client.call("orderbook", { symbol });
+  const block = (res && res.iepiev) || {};
+  const iep = Number((block.iep || {}).raw);
+  const iev = Number((block.iev || {}).raw);
+  if (!Number.isFinite(iep) || iep <= 0) return null;
+  const previous = Number(res.close);
+  const pctVsPrev = Number.isFinite(previous) && previous > 0
+    ? ((iep - previous) / previous) * 100
+    : null;
+  return { symbol, iep, iev, pctVsPrev };
+}
+
+async function preOpenBlock(wl, client) {
+  const title = `⏳ PRE-OPENING WATCHLIST — ${escHtml(wl.name || WATCHLIST_NAME)}`;
+  if (!wl.rows.length) return section(title, noteEmpty());
+  const rows = await Promise.all(
+    wl.rows.map((r) => getPreOpen(client, r.symbol).catch(() => null))
+  );
+  const ievLabel = (x) => (Number.isFinite(x) && x > 0 ? num(x, 0) : "-");
+  const lines = rows
+    .filter((p) => p !== null)
+    .map((p, i) => {
+      const pctS = p.pctVsPrev === null ? "n/a" : pctPlain(p.pctVsPrev);
+      return `${i + 1}. ${escHtml(p.symbol)}  IEP ${harga(p.iep)}  (${pctS} vs prev)  IEV ${ievLabel(p.iev)}`;
+    });
+  return section(title, lines.length ? lines : noteEmpty());
+}
+
 async function getWatchlist(client) {
   const listsRes = await client.call("watchlist", {});
   const lists = (listsRes && listsRes.data && listsRes.data.watchlists) || (listsRes && listsRes.watchlists) || [];
@@ -354,12 +383,13 @@ function kv(fn) {
 
 async function buildMorning(client) {
   const dateStr = wibDateTime(new Date());
-  const [ihsg, aku, jual, big, news] = await Promise.all([
+  const [ihsg, aku, jual, big, news, wl] = await Promise.all([
     getIhsg(client),
     getMovers(client, "netForeignBuy", LIST_N),
     getMovers(client, "netForeignSell", LIST_N),
     getMovers(client, "bigMoneyNetValue", LIST_N),
-    getNews(client, NEWS_N)
+    getNews(client, NEWS_N),
+    getWatchlist(client)
   ]);
 
   const session = aku.session || jual.session || big.session;
@@ -372,6 +402,8 @@ async function buildMorning(client) {
   const blocks = [header];
 
   blocks.push(indeksBlock(ihsg));
+
+  blocks.push(await preOpenBlock(wl, client));
 
   blocks.push(section("🟢 AKUMULASI ASING (NET BUY)", aku.rows.length
     ? aku.rows.map(kv(foreignBuyLine))
