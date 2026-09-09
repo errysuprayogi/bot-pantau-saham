@@ -152,10 +152,13 @@ async function getPreOpen(client, symbol) {
   const iep = Number((block.iep || {}).raw);
   const iev = Number((block.iev || {}).raw);
   if (!Number.isFinite(iep) || iep <= 0) return null;
-  const previous = Number(res.close);
-  const pctVsPrev = Number.isFinite(previous) && previous > 0
-    ? ((iep - previous) / previous) * 100
-    : null;
+  const wirePct = Number(((block.iep_changes || {}).percentage || {}).raw);
+  const previous = Number(res.previous);
+  const pctVsPrev = Number.isFinite(wirePct) && block.status !== "STATUS_UNSPECIFIED"
+    ? wirePct
+    : Number.isFinite(previous) && previous > 0
+      ? ((iep - previous) / previous) * 100
+      : null;
   return { symbol, iep, iev, pctVsPrev };
 }
 
@@ -327,18 +330,32 @@ async function watchlistReview(wl, client) {
   return section(title, sentences);
 }
 
+function readPct(x) {
+  if (x === null || x === undefined || x === "") return null;
+  const n = Number(x);
+  return Number.isFinite(n) ? n : null;
+}
+
+function moverPct(row) {
+  const c = readPct(row.changePercent);
+  if (c !== null) return pct(c);
+  const p = readPct(row.iepIev && row.iepIev.iepChangePrev);
+  if (p !== null) return pct(p);
+  return "n/a";
+}
+
 function foreignSellLine(i, row) {
-  return `${i}. ${escHtml(row.symbol)}  ${harga(row.price)}  (${pct(row.changePercent)})  ${idrShort(row.netForeignSell)}`;
+  return `${i}. ${escHtml(row.symbol)}  ${harga(row.price)}  (${moverPct(row)})  ${idrShort(row.netForeignSell)}`;
 }
 
 function foreignBuyLine(i, row) {
-  return `${i}. ${escHtml(row.symbol)}  ${harga(row.price)}  (${pct(row.changePercent)})  ${idrShort(row.netForeignBuy)}`;
+  return `${i}. ${escHtml(row.symbol)}  ${harga(row.price)}  (${moverPct(row)})  ${idrShort(row.netForeignBuy)}`;
 }
 
 function bigMoneyLine(i, row) {
   const v = Number(row.bigMoneyNetValue);
   const arah = v >= 0 ? "🟢 akum" : "🔴 dist";
-  return `${i}. ${escHtml(row.symbol)}  ${harga(row.price)}  (${pct(row.changePercent)})  ${arah} ${idrShort(Math.abs(v))}`;
+  return `${i}. ${escHtml(row.symbol)}  ${harga(row.price)}  (${moverPct(row)})  ${arah} ${idrShort(Math.abs(v))}`;
 }
 
 function indeksBlock(ihsg) {
